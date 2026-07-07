@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)file:///C:/Users/This/Downloads/index_2.html -->
+<html lang="th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>บันทึกการหยิบสินค้า</title>
+<style>
+  :root {
+    --ink: #1c1c1a;
+    --ink-soft: #5b5b56;
+    --line: #dedcd3;
+    --paper: #fdfcf9;
+    --card: #ffffff;
+    --accent: #b5502e;
+    --accent-soft: #f4e6df;
+    --danger: #a32d2d;
+    --danger-soft: #fcebeb;
+    --ok: #3b6d11;
+    --ok-soft: #eaf3de;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Noto Sans Thai", Sarabun, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 3rem;
+  }
+  header {
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--card);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 2px;
+  }
+  header p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  main {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1rem 1rem 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.1rem 1.1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .card h2 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 .9rem;
+  }
+  label {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0 0 4px;
+  }
+  input, select {
+    width: 100%;
+    font-size: 15px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    margin-bottom: 12px;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .row2 { display: flex; gap: 10px; }
+  .row2 > div { flex: 1; }
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  button:active { opacity: .85; }
+  button.secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    font-weight: 500;
+    padding: 8px 12px;
+    width: auto;
+    font-size: 13px;
+  }
+  .error {
+    font-size: 13px;
+    color: var(--danger);
+    margin-top: 6px;
+    display: none;
+  }
+  .stats { display: flex; gap: 10px; margin-bottom: 1rem; }
+  .stat {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: .9rem 1rem;
+  }
+  .stat .label { font-size: 12px; color: var(--ink-soft); }
+  .stat .value { font-size: 24px; font-weight: 700; margin-top: 2px; }
+  .log-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .log-item {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+  }
+  .log-item .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .log-item .name { font-weight: 700; }
+  .log-item .time { color: var(--ink-soft); font-size: 12px; }
+  .log-item .meta { color: var(--ink-soft); margin-top: 2px; }
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 6px;
+  }
+  .badge.short { background: var(--danger-soft); color: var(--danger); }
+  .muted { color: var(--ink-soft); font-size: 13px; }
+  .setup-box textarea, .setup-box input {
+    font-size: 13px;
+  }
+  .status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background: var(--line);
+  }
+  .status-dot.on { background: var(--ok); }
+  .status-dot.off { background: var(--danger); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>บันทึกการหยิบสินค้า</h1>
+  <p><span id="statusDot" class="status-dot on"></span><span id="statusText">เชื่อมต่อฐานข้อมูลแล้ว</span></p>
+</header>
+
+<main>
+
+  <div class="card" id="setupCard" style="display:none;">
+    <h2>ตั้งค่าการเชื่อมต่อ</h2>
+    <p class="muted" style="margin-top:-6px;margin-bottom:10px;">
+      วาง Web app URL จาก Google Apps Script ที่นี่ ระบบจะจำไว้ในเครื่องนี้อัตโนมัติ
+    </p>
+    <label>Web app URL</label>
+    <input id="apiUrl" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+    <button class="secondary" id="saveUrlBtn">บันทึกการตั้งค่า</button>
+  </div>
+  <p style="text-align:right;margin:-6px 0 14px;">
+    <a href="file:///C:/Users/This/Downloads/index_2.html#" id="showSetupLink" style="font-size:12px;color:var(--ink-soft);">เปลี่ยนการตั้งค่าเชื่อมต่อ</a>
+  </p>
+
+  <div class="card">
+    <h2>บันทึกรายการใหม่</h2>
+
+    <label>ช่องทางออเดอร์</label>
+    <select id="platform">
+      <option value="TikTok">TikTok</option>
+      <option value="Shopee">Shopee</option>
+      <option value="Lazada">Lazada</option>
+      <option value="หน้าร้าน">หน้าร้าน (walk-in)</option>
+    </select>
+
+    <label>เลขที่ออเดอร์</label>
+    <input id="orderNo" type="text" placeholder="เช่น TT-20260706-013">
+
+    <label>ชื่อสินค้า / SKU</label>
+    <div style="display:flex; gap:8px;">
+      <input id="productName" type="text" placeholder="เช่น เสื้อยืดสีขาว-M / SKU001" style="margin-bottom:0;">
+      <button type="button" id="scanBtn" class="secondary" style="width:auto; white-space:nowrap;">สแกน</button>
+    </div>
+    <div style="margin-bottom:12px;"></div>
+
+    <div class="row2">
+      <div>
+        <label>จำนวนที่หยิบ</label>
+        <input id="qty" type="number" min="1" step="1" placeholder="0">
+      </div>
+      <div>
+        <label>ของพอไหม</label>
+        <select id="stockOk">
+          <option value="พอ">พอ</option>
+          <option value="ไม่พอ">ไม่พอ</option>
+        </select>
+      </div>
+    </div>
+
+    <label>ชื่อพนักงานผู้หยิบ</label>
+    <input id="staffName" type="text" placeholder="ชื่อพนักงาน">
+
+    <label>หมายเหตุ (ถ้ามี)</label>
+    <input id="note" type="text" placeholder="เช่น ของขาด เหลือแค่ 2 ชิ้น">
+
+    <button id="submitBtn">บันทึกรายการ</button>
+    <div class="error" id="errorMsg"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="label">รายการวันนี้</div>
+      <div class="value" id="countToday">–</div>
+    </div>
+    <div class="stat">
+      <div class="label">ของไม่พอวันนี้</div>
+      <div class="value" id="countShort">–</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="log-head">
+      <h2 style="margin:0;">ประวัติล่าสุด</h2>
+      <button class="secondary" id="refreshBtn">รีเฟรช</button>
+    </div>
+    <div id="logList"><div class="muted">ยังไม่มีข้อมูล</div></div>
+  </div>
+
+</main>
+
+<div id="scannerModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:12px; padding:1rem; width:90%; max-width:400px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <strong>สแกนบาร์โค้ด</strong>
+      <button type="button" id="closeScannerBtn" class="secondary" style="width:auto; padding:4px 10px;">ปิด</button>
+    </div>
+    <div id="reader" style="width:100%;"></div>
+    <p class="muted" style="margin-top:8px; margin-bottom:0;">เล็งกล้องไปที่บาร์โค้ดสินค้าให้อยู่ในกรอบ</p>
+  </div>
+</div>
+
+<script src="file:///C:/Users/This/Downloads/html5-qrcode.min.js"></script>
+
+<script>
+const URL_KEY = 'picking-app-api-url';
+const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbxYTrqsEfWoUvT9FLUJsQ7KEhqOeUDK3Guy2ULy_6oe6-SiFhvChf2QCA3b1-7CDGwj/exec';
+let apiUrl = localStorage.getItem(URL_KEY) || DEFAULT_API_URL;
+let logs = [];
+
+function $(id) { return document.getElementById(id); }
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function setStatus(connected) {
+  $('statusDot').className = 'status-dot ' + (connected ? 'on' : 'off');
+  $('statusText').textContent = connected ? 'เชื่อมต่อฐานข้อมูลแล้ว' : 'ยังไม่ได้เชื่อมต่อฐานข้อมูล';
+  if (!connected) $('setupCard').style.display = 'block';
+}
+
+if (apiUrl) {
+  $('apiUrl').value = apiUrl;
+  setStatus(true);
+} else {
+  setStatus(false);
+}
+
+$('saveUrlBtn').addEventListener('click', function () {
+  const val = $('apiUrl').value.trim();
+  if (!val) return;
+  apiUrl = val;
+  localStorage.setItem(URL_KEY, apiUrl);
+  setStatus(true);
+  $('setupCard').style.display = 'none';
+  loadLogs();
+});
+
+$('showSetupLink').addEventListener('click', function (e) {
+  e.preventDefault();
+  $('setupCard').style.display = 'block';
+});
+
+function render() {
+  const today = todayStr();
+  const todayLogs = logs.filter(function (l) {
+    const t = new Date(l['เวลาบันทึก']);
+    return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0') === today;
+  });
+  $('countToday').textContent = todayLogs.length;
+  $('countShort').textContent = todayLogs.filter(function (l) { return l['สถานะสต็อก'] === 'ไม่พอ'; }).length;
+
+  const listEl = $('logList');
+  if (logs.length === 0) {
+    listEl.innerHTML = '<div class="muted">ยังไม่มีข้อมูล</div>';
+    return;
+  }
+
+  listEl.innerHTML = logs.slice().reverse().slice(0, 40).map(function (l) {
+    const badge = l['สถานะสต็อก'] === 'ไม่พอ' ? '<span class="badge short">ของไม่พอ</span>' : '';
+    const time = l['เวลาบันทึก'] ? new Date(l['เวลาบันทึก']).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+    const note = l['หมายเหตุ'] ? '<div class="meta">' + escapeHtml(l['หมายเหตุ']) + '</div>' : '';
+    return '<div class="log-item">'
+      + '<div class="top"><span class="name">' + escapeHtml(l['ชื่อสินค้า']) + badge + '</span>'
+      + '<span class="time">' + time + '</span></div>'
+      + '<div class="meta">' + escapeHtml(l['ช่องทาง']) + ' · ' + escapeHtml(l['เลขออเดอร์'])
+      + ' · จำนวน ' + escapeHtml(String(l['จำนวน'])) + ' · โดย ' + escapeHtml(l['ชื่อพนักงาน']) + '</div>'
+      + note
+      + '</div>';
+  }).join('');
+}
+
+async function loadLogs() {
+  if (!apiUrl) return;
+  try {
+    const res = await fetch(apiUrl, { method: 'GET' });
+    logs = await res.json();
+    render();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+$('refreshBtn').addEventListener('click', loadLogs);
+
+let html5QrCode = null;
+
+function stopScanner() {
+  if (html5QrCode) {
+    html5QrCode.stop().then(function () {
+      html5QrCode.clear();
+      $('scannerModal').style.display = 'none';
+    }).catch(function () {
+      $('scannerModal').style.display = 'none';
+    });
+  } else {
+    $('scannerModal').style.display = 'none';
+  }
+}
+
+$('scanBtn').addEventListener('click', function () {
+  if (typeof Html5Qrcode === 'undefined') {
+    alert('โหลดตัวสแกนไม่สำเร็จ กรุณาเช็คอินเทอร์เน็ตแล้วลองรีเฟรชหน้านี้ใหม่');
+    return;
+  }
+  $('scannerModal').style.display = 'flex';
+  html5QrCode = new Html5Qrcode('reader');
+  html5QrCode.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: 220 },
+    function (decodedText) {
+      $('productName').value = decodedText;
+      stopScanner();
+    },
+    function () {}
+  ).catch(function (err) {
+    alert('เปิดกล้องไม่สำเร็จ กรุณาอนุญาตให้เข้าถึงกล้อง: ' + err);
+    $('scannerModal').style.display = 'none';
+  });
+});
+
+$('closeScannerBtn').addEventListener('click', stopScanner);
+
+$('submitBtn').addEventListener('click', async function () {
+  const platform = $('platform').value;
+  const orderNo = $('orderNo').value.trim();
+  const productName = $('productName').value.trim();
+  const qty = $('qty').value;
+  const stockOk = $('stockOk').value;
+  const staffName = $('staffName').value.trim();
+  const note = $('note').value.trim();
+  const errorEl = $('errorMsg');
+  const btn = $('submitBtn');
+
+  if (!apiUrl) {
+    errorEl.textContent = 'กรุณาตั้งค่า Web app URL ก่อนใช้งาน';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if (!orderNo || !productName || !qty || !staffName) {
+    errorEl.textContent = 'กรอกเลขออเดอร์ ชื่อสินค้า จำนวน และชื่อพนักงานให้ครบ';
+    errorEl.style.display = 'block';
+    return;
+  }
+  errorEl.style.display = 'none';
+  btn.textContent = 'กำลังบันทึก...';
+  btn.disabled = true;
+
+  try {
+    await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ platform, orderNo, productName, qty, stockOk, staffName, note })
+    });
+    $('orderNo').value = '';
+    $('productName').value = '';
+    $('qty').value = '';
+    $('note').value = '';
+    $('stockOk').value = 'พอ';
+    await loadLogs();
+  } catch (e) {
+    errorEl.textContent = 'บันทึกไม่สำเร็จ เช็คอินเทอร์เน็ตแล้วลองอีกครั้ง';
+    errorEl.style.display = 'block';
+  }
+  btn.textContent = 'บันทึกรายการ';
+  btn.disabled = false;
+});
+
+if (apiUrl) loadLogs();
+</script>
+
+
+
+</body></html>
